@@ -1,5 +1,3 @@
-// Registration.js
-
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
@@ -9,53 +7,75 @@ const Registration = () => {
   const navigation=useNavigate()
   const [sucess, setSucess] = useState(false);
   const [username, setUsername] = useState('');
+  const [loading,setLoading]=useState(false)
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [captchaValue, setCaptchaValue] = useState(null);
-
   const [error,seterror]=useState({
     usernameexist:true,username:true,email:true,password:true,passwordc:true,captcha:true
-  ,emailexist:true,ipassword:true,captcha:true})
-
+  ,emailexist:true,ipassword:true,captcha:true});
   const handleRegistration = async (event) => {
-    setSucess(false)
+    setSucess(false);
+    setLoading(true)
     event.preventDefault();
-    console.log("hello")
-    seterror({...error,usernameexist:true,password:true,username:true,email:true,captcha:true,emailexist:true,passwordc:true,ipassword:true});
+    seterror({
+      usernameexist: true,
+      password: true,
+      username: true,
+      email: true,
+      captcha: true,
+      emailexist: true,
+      passwordc: true,
+      ipassword: true,
+    });
 
+  
     try {
-      const response = await axios.post('https://accredian-backend-task-ng74.onrender.com/register', {
-        username: username,
-        email: email,
-        password: password,
-        confirmPassword:confirmPassword
-      });
+      if (!captchaValue) {
+        seterror((prevError) => ({ ...prevError, captcha: false }));
+      } 
+      else{
+      const response = await axios.post(
+        'https://accredian-backend-task-ng74.onrender.com/register',
+        {
+          username: username,
+          email: email,
+          password: password,
+          confirmPassword: confirmPassword,
+        }
+      );
       if (response.data.error === 'Username is required') {
-        seterror({...error,username:false});
+        seterror((prevError) => ({ ...prevError, username: false }));
       } else if (response.data.error === 'Password is required') {
-        seterror({...error,password:false});
+        seterror((prevError) => ({ ...prevError, password: false }));
       } else if (response.data.error === 'Username already exists') {
-        seterror({...error,usernameexist:false});
-      }else if (response.data.error === 'Email already exists') {
-        seterror({...error,emailexist:false});
-      }else if (response.data.error === 'Passwords do not match') {
-        seterror({...error,passwordc:false});
-      }else if (response.data.error === 'Invalid Password') {
-        seterror({...error,ipassword:false});
-      }else if (response.data.error === 'Invalid email format') {
-        seterror({...error,email:false});
-      }else if (response.data.error === 'reCAPTCHA verification failed') {
-        seterror({...error,captcha:false});
+        seterror((prevError) => ({ ...prevError, usernameexist: false }));
+      } else if (response.data.error === 'Email already exists') {
+        seterror((prevError) => ({ ...prevError, emailexist: false }));
+      } else if (response.data.error === 'Passwords do not match') {
+        seterror((prevError) => ({ ...prevError, passwordc: false }));
+      } else if (response.data.error === 'Invalid Password') {
+        seterror((prevError) => ({ ...prevError, ipassword: false }));
+      } else if (response.data.error === 'Invalid email format') {
+        seterror((prevError) => ({ ...prevError, email: false }));
       }else {
-        setSucess(true)
-        seterror({...error,usernameexist:true,password:true,username:true,email:true,captcha:true,emailexist:true,passwordc:true,ipassword:true,captcha:true});
-      }
-      setCaptchaValue(null)
-      console.log(response.data)
+        setSucess(true);
+        seterror({
+          usernameexist: true,
+          password: true,
+          username: true,
+          email: true,
+          captcha: true,
+          emailexist: true,
+          passwordc: true,
+          ipassword: true,
+        });
+        setCaptchaValue(null);
+      }}
     } catch (error) {
-      console.log(error.message+" ");
     }
+    setLoading(false)
   };
 
   const handleCaptchaChange = (value) => {
@@ -109,7 +129,8 @@ const Registration = () => {
         <ReCAPTCHA sitekey="6Le-eywpAAAAAPeE6udVa56XZg3RGrgu8vLMBTZO" onChange={handleCaptchaChange} />
       </div>
       <div class="button" onClick={handleRegistration}>
-        <input type="submit" value="Register" />
+        <input type="submit" value={loading ? 'Loading...' : 'Register'} disabled={loading} />
+        
         <input type="submit" value="Login" onClick={()=>{navigation('/login')}} />
         {!error.captcha?<div style={{"fontSize":"15px","color":"red","textAlign":"center","fontSize":"20px"}}>Invalid Captcha</div>:<span></span>}
         {sucess?
