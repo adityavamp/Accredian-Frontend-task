@@ -7,6 +7,7 @@ import ReCAPTCHA from 'react-google-recaptcha';
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [loading,setLoading]=useState(false)
   const [error, setError] = useState(false);
   const navigation=useNavigate()
   const handleCaptchaChange = (value) => {
@@ -17,27 +18,36 @@ const Login = () => {
 
   const handleLogin = async (event) => {
     event.preventDefault();
-    if(!captchaValue)
-    {
-        setErrormessage('Invalid Captcha')
-        setError(true);
-    }
+    setLoading(true)
     setError(false)
     try {
+ 
       const response = await axios.post('https://accredian-backend-task-ng74.onrender.com/login', {
         username: username,
         password: password,
       });
+      console.log(response.data.error)
       if (response.data.message === 'Login successful') {
         console.log('Login successful');
         navigation('/home')
-      } else {
-        setErrormessage("Invalid username or password")
+      } else if (!username) {
+        setErrormessage("Enter Username")
+        setError(true);
+      } else if (!password) {
+        setErrormessage("Enter password")
+        setError(true);
+      }   else if(!captchaValue)
+      {
+          setErrormessage('Invalid Captcha')
+          setError(true);
+      }else{
+        setErrormessage("User not found or Invalid password")
         setError(true);
       }
     } catch (error) {
       setError(true);
     }
+    setLoading(false)
   };
 
   return (
@@ -68,8 +78,8 @@ const Login = () => {
                     
 					</div>
 					<div class="container-login100-form-btn">
-						<button class="login100-form-btn">
-							Login
+						<button class="login100-form-btn" disabled={loading} va>
+            {loading ? 'Loading...' : 'Login'}
 						</button>
 						<button class="login100-form-btn" onClick={()=>{navigation("/Registration")}} >Registration </button>
 					</div>
