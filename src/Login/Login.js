@@ -27,7 +27,12 @@ const Login = () => {
         password: password,
       });
       console.log(response.data.error)
-      if (response.data.message === 'Login successful') {
+      if(!captchaValue)
+      {
+          setErrormessage('Invalid Captcha')
+          setError(true);
+      }
+      else if (response.data.message === 'Login successful') {
         console.log('Login successful');
         navigation('/home')
       } else if (!username) {
@@ -36,11 +41,8 @@ const Login = () => {
       } else if (!password) {
         setErrormessage("Enter password")
         setError(true);
-      }   else if(!captchaValue)
-      {
-          setErrormessage('Invalid Captcha')
-          setError(true);
-      }else{
+      }
+      else{
         setErrormessage("User not found or Invalid password")
         setError(true);
       }
